@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Grid-Based Game</title>
+    <style>
+        #area {
+            position: relative;
+            background-color: #f0f0f0;
+        }
+
+        .entity {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background-color: red;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .entity:nth-child(1) {
+            background-color: blue;
+        }
+
+        /* Player */
+        .entity:nth-child(2) {
+            background-color: green;
+        }
+
+        /* Goblin */
+        .entity:nth-child(3) {
+            background-color: purple;
+        }
+
+        /* Skeleton */
+        .entity:nth-child(4) {
+            background-color: orange;
+        }
+
+        /* Orc */
+    </style>
+</head>
+
+<body>
+    <div id="area"></div>
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>

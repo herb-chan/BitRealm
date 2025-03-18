@@ -1,0 +1,11 @@
+{
+    "name": "little-browser-rpg",
+    "version": "0.0.1",
+    "main": "server.js",
+    "author": "herb",
+    "license": "MIT",
+    "description": "",
+    "dependencies": {
+        "express": "^4.21.2"
+    }
+}
