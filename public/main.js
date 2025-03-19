@@ -2,17 +2,6 @@ import { Area } from "./scripts/Area.js";
 import { Mob } from "./scripts/Mob.js";
 import { Burn } from "./scripts/status-effects/Burn.js";
 
-import {
-    StateManager,
-    State,
-    IdleState,
-    ChaseState,
-    FleeState,
-    AttackState,
-    WanderState,
-    PatrolState,
-} from "./scripts/states/StateManager.js";
-
 // Create the game area
 const gameArea = new Area("Forest", "area", 10, 10);
 
@@ -85,26 +74,6 @@ gameArea.addEntity(player);
 gameArea.addEntity(goblin);
 gameArea.addEntity(skeleton);
 gameArea.addEntity(orc);
-
-// Click handler for pathfinding (unchanged from your code)
-gameArea.container.addEventListener("click", (event) => {
-    const rect = gameArea.container.getBoundingClientRect();
-    const x = Math.floor((event.clientX - rect.left) / gameArea.cellWidth);
-    const y = Math.floor((event.clientY - rect.top) / gameArea.cellHeight);
-
-    const targetEntity = gameArea.grid[y][x];
-    if (targetEntity) {
-        player.setTarget(targetEntity);
-        player.state_manager.setState(new ChaseState(player)); // Switch to ChaseState
-    } else {
-        player.path = gameArea.aStar(player.position, { x, y });
-        if (player.path && player.path.length > 1) {
-            player.path.shift(); // Remove current position
-        }
-        player.setTarget(null);
-        player.state_manager.setState(new IdleState(player)); // Back to IdleState when moving
-    }
-});
 
 // Modified game loop to include simulation steps
 function gameLoop() {
