@@ -1,5 +1,6 @@
-import { Area } from "./scripts/area.js";
-import { Mob } from "./scripts/mob.js";
+import { Area } from "./scripts/Area.js";
+import { Mob } from "./scripts/Mob.js";
+import { Burn } from "./scripts/status-effects/Burn.js";
 
 import {
     StateManager,
@@ -10,7 +11,7 @@ import {
     AttackState,
     WanderState,
     PatrolState,
-} from "./scripts/states/statemanager.js";
+} from "./scripts/states/StateManager.js";
 
 // Create the game area
 const gameArea = new Area("Forest", "area", 10, 10);
@@ -35,8 +36,6 @@ const player = new Mob(
 );
 player.position = { x: 0, y: 0 };
 player.canWander = false;
-player.stateManager = new StateManager(); // Add StateManager
-player.stateManager.setState(new IdleState(player)); // Start in IdleState
 
 // Create other mobs
 const goblin = new Mob(
@@ -57,8 +56,6 @@ const goblin = new Mob(
     1
 );
 goblin.position = { x: 1, y: 1 };
-// goblin.setTarget(player);
-goblin.stateManager.setState(new IdleState(goblin));
 
 const skeleton = new Mob(
     2,
@@ -78,19 +75,16 @@ const skeleton = new Mob(
     0
 );
 skeleton.position = { x: 2, y: 1 };
-skeleton.setTarget(player); // Skeleton targets player, will start in ChaseState
-skeleton.stateManager.setState(new ChaseState(skeleton));
 
-// const orc = new Mob(3, "orc", "Orc", 8, 200, 200, 5, 1, {}, 2, 15, 1, 1, 5, 2);
-// orc.position = { x: 4, y: 2 };
-// orc.stateManager = new StateManager();
-// orc.stateManager.setState(new WanderState(orc));
+const orc = new Mob(3, "orc", "Orc", 8, 200, 200, 5, 1, {}, 2, 15, 1, 1, 5, 2);
+orc.position = { x: 4, y: 2 };
+orc.apply_status_effect(new Burn(10, 10));
 
 // Add entities to the game area
 gameArea.addEntity(player);
 gameArea.addEntity(goblin);
 gameArea.addEntity(skeleton);
-// gameArea.addEntity(orc);
+gameArea.addEntity(orc);
 
 // Click handler for pathfinding (unchanged from your code)
 gameArea.container.addEventListener("click", (event) => {
@@ -101,14 +95,14 @@ gameArea.container.addEventListener("click", (event) => {
     const targetEntity = gameArea.grid[y][x];
     if (targetEntity) {
         player.setTarget(targetEntity);
-        player.stateManager.setState(new ChaseState(player)); // Switch to ChaseState
+        player.state_manager.setState(new ChaseState(player)); // Switch to ChaseState
     } else {
         player.path = gameArea.aStar(player.position, { x, y });
         if (player.path && player.path.length > 1) {
             player.path.shift(); // Remove current position
         }
         player.setTarget(null);
-        player.stateManager.setState(new IdleState(player)); // Back to IdleState when moving
+        player.state_manager.setState(new IdleState(player)); // Back to IdleState when moving
     }
 });
 

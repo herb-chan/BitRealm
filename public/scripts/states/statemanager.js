@@ -1,4 +1,4 @@
-import { Mob } from "../mob.js";
+import { Mob } from "../Mob.js";
 
 export class StateManager {
     constructor(entity) {
@@ -41,14 +41,14 @@ export class AttackState extends State {
 
     update() {
         if (!this.target || this.target.dead) {
-            this.entity.stateManager.setState(new IdleState(this.entity));
+            this.entity.state_manager.setState(new IdleState(this.entity));
             return;
         }
 
         if (this.entity.is_target_in_range(this.target)) {
             this.entity.attack(this.target);
         } else {
-            this.entity.stateManager.setState(new ChaseState(this.entity));
+            this.entity.state_manager.setState(new ChaseState(this.entity));
         }
     }
 
@@ -59,14 +59,14 @@ export class ChaseState extends State {
     enter() {
         this.target = this.entity.target;
         this.currentAggroRange = this.entity.aggro_range;
-        if (this.target.stateManager.currentState instanceof FleeState) {
+        if (this.target.state_manager.currentState instanceof FleeState) {
             this.currentAggroRange *= 2; // Double aggro range if target is fleeing
         }
     }
 
     update() {
         if (!this.target || this.target.dead) {
-            this.entity.stateManager.setState(new IdleState(this.entity));
+            this.entity.state_manager.setState(new IdleState(this.entity));
             return;
         }
 
@@ -75,9 +75,9 @@ export class ChaseState extends State {
         const distance = dx + dy;
 
         if (distance <= this.entity.attack_range) {
-            this.entity.stateManager.setState(new AttackState(this.entity));
+            this.entity.state_manager.setState(new AttackState(this.entity));
         } else if (distance > this.currentAggroRange) {
-            this.entity.stateManager.setState(new IdleState(this.entity));
+            this.entity.state_manager.setState(new IdleState(this.entity));
         } else {
             const now = performance.now();
             if (now - this.entity.last_move_time >= 1000 / this.entity.speed) {
@@ -121,7 +121,7 @@ export class FleeState extends State {
             now - this.entity.last_attacked_time >= 5000 ||
             this.entity.health > this.entity.max_health * 0.2
         ) {
-            this.entity.stateManager.setState(new IdleState(this.entity));
+            this.entity.state_manager.setState(new IdleState(this.entity));
             return;
         }
 
@@ -172,7 +172,7 @@ export class IdleState extends State {
             );
             const distance = dx + dy;
             if (distance <= this.entity.aggro_range) {
-                this.entity.stateManager.setState(new ChaseState(this.entity));
+                this.entity.state_manager.setState(new ChaseState(this.entity));
                 return;
             }
         }
@@ -190,11 +190,11 @@ export class IdleState extends State {
             ) {
                 if (this.entity.canWander) {
                     if (this.entity instanceof Mob && this.entity.canPatrol) {
-                        this.entity.stateManager.setState(
+                        this.entity.state_manager.setState(
                             new PatrolState(this.entity)
                         );
                     } else {
-                        this.entity.stateManager.setState(
+                        this.entity.state_manager.setState(
                             new WanderState(this.entity)
                         );
                     }
@@ -240,13 +240,13 @@ export class PatrolState extends State {
                     this.entity.target.position.y - this.entity.position.y
                 );
             if (distance <= this.entity.aggro_range) {
-                this.entity.stateManager.setState(new ChaseState(this.entity));
+                this.entity.state_manager.setState(new ChaseState(this.entity));
                 return;
             }
         }
 
         if (now - this.entity.last_attacked_time < 2000) {
-            this.entity.stateManager.setState(new IdleState(this.entity));
+            this.entity.state_manager.setState(new IdleState(this.entity));
             return;
         }
 
@@ -316,7 +316,7 @@ export class WanderState extends State {
             );
             const distance = dx + dy;
             if (distance <= this.entity.aggro_range) {
-                this.entity.stateManager.setState(new ChaseState(this.entity));
+                this.entity.state_manager.setState(new ChaseState(this.entity));
                 return;
             }
         }
@@ -324,7 +324,7 @@ export class WanderState extends State {
         const now = performance.now();
 
         if (now - this.entity.last_attacked_time < 2000) {
-            this.entity.stateManager.setState(new IdleState(this.entity));
+            this.entity.state_manager.setState(new IdleState(this.entity));
             return;
         }
 
@@ -359,7 +359,7 @@ export class WanderState extends State {
 
         // End wandering after the duration.
         if (now - this.startTime >= this.wanderDuration) {
-            this.entity.stateManager.setState(new IdleState(this.entity));
+            this.entity.state_manager.setState(new IdleState(this.entity));
         }
     }
 

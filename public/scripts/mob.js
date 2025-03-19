@@ -1,14 +1,4 @@
-import { Entity } from "./entity.js";
-import {
-    StateManager,
-    State,
-    IdleState,
-    ChaseState,
-    FleeState,
-    AttackState,
-    WanderState,
-    PatrolState,
-} from "./states/statemanager.js";
+import { Entity } from "./Entity.js";
 
 export class Mob extends Entity {
     constructor(
@@ -57,8 +47,6 @@ export class Mob extends Entity {
         this.canChase = true;
         this.canPatrol = false;
         this.patrol_center = null; // Set if patrolling is enabled
-
-        this.stateManager.setState(new IdleState(this));
     }
 
     /**

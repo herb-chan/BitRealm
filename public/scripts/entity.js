@@ -1,15 +1,7 @@
-import { Utility } from "./utils.js";
-import { Debuff, DebuffManager } from "./debuffs/debuffmanager.js";
-import {
-    StateManager,
-    State,
-    IdleState,
-    ChaseState,
-    FleeState,
-    AttackState,
-    WanderState,
-    PatrolState,
-} from "./states/statemanager.js";
+import { Utility } from "./Utils.js";
+import { StatusEffect } from "./status-effects/StatusEffect.js";
+import { StatusEffectManager } from "./status-effects/StatusEffectsManager.js";
+import { StateManager, IdleState } from "./states/StateManager.js";
 
 /**
  * Represents an entity in the game world.
@@ -50,7 +42,7 @@ export class Entity {
         this.speed = speed;
         this.drops = drops;
         this.health_regeneration = health_regeneration;
-        this.debuff_manager = new DebuffManager();
+
         this.dead = false;
         this.position = { x: 0, y: 0 };
         this.area = null;
@@ -62,15 +54,15 @@ export class Entity {
         this.last_wander_time = 0;
         this.last_move_time = 0;
 
-        // State-related properties
-        this.stateManager = new StateManager(this);
         this.canWander = true;
         this.canFlee = true;
-        this.wandering_factor = 1; // Default wandering factor
-        this.attacker = null; // To track who attacked last
+        this.wandering_factor = 1;
+        this.attacker = null;
 
-        // Initialize with IdleState
-        this.stateManager.setState(new IdleState(this));
+        this.status_effect_manager = new StatusEffectManager();
+        this.state_manager = new StateManager(this);
+
+        this.state_manager.setState(new IdleState(this));
     }
 
     /**
@@ -91,22 +83,19 @@ export class Entity {
     /**
      * Applies damage to the entity.
      * @param {number} damage_amount - The amount of damage to apply.
-     * @param {boolean} from_debuff - Whether the damage is from a debuff.
+     * @param {boolean} from_status_effect - Whether the damage is from a status effect.
      * @returns {Object|null} - Returns loot if the entity dies.
      */
-    take_damage(damage_amount, from_debuff = false) {
+    take_damage(damage_amount, from_status_effect = false) {
         if (this.dead) return null;
         this.update_action_time("last_attacked_time");
-        this.attacker = from_debuff
+        this.attacker = from_status_effect
             ? null
             : this.area?.entities.find((e) => e.target === this); // Simplified attacker detection
-        const actual_damage = from_debuff
+        const actual_damage = from_status_effect
             ? damage_amount
             : damage_amount * (1 - this.defence / (this.defence + 100));
         this.health = Math.max(0, this.health - actual_damage);
-        if (this.health <= this.max_health * 0.2 && this.canFlee) {
-            this.stateManager.setState(new FleeState(this));
-        }
         if (this.area) this.area.updateEntityDisplay(this);
         return this.health === 0 ? this.on_death() : null;
     }
@@ -139,7 +128,7 @@ export class Entity {
      */
     on_death() {
         const loot = this.drop_loot();
-        this.debuff_manager.debuffs = [];
+        this.status_effect_manager.status_effects = [];
         this.dead = true;
         if (this.area) this.area.removeEntity(this);
         return loot;
@@ -184,21 +173,25 @@ export class Entity {
      */
     update() {
         if (!this.dead) {
-            this.debuff_manager.update_debuffs(this);
-            this.stateManager.update();
+            this.status_effect_manager.update_status_effects(this);
+            this.state_manager.update();
             if (this.area) this.area.updateEntityDisplay(this);
             if (this.health < this.max_health) this.regenerate();
         }
     }
 
     /**
-     * Applies a status effect (debuff) to the entity.
-     * @param {Debuff} debuff - The debuff to apply.
+     * Applies a status effect to the entity.
+     * @param {StatusEffect} status_effect - The status_effect to apply.
      */
-    apply_status_effect(debuff) {
-        if (!(debuff instanceof Debuff)) {
-            throw new Error("apply_status_effect expects a Debuff instance.");
+    apply_status_effect(status_effect) {
+        if (!(status_effect instanceof StatusEffect)) {
+            throw new Error(
+                "apply_status_effect expects a StatusEffect instance."
+            );
         }
-        this.debuff_manager.apply_debuff(debuff);
+
+        status_effect.entity = this;
+        this.status_effect_manager.apply_status_effect(status_effect);
     }
 }
