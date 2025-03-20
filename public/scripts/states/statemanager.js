@@ -45,8 +45,8 @@ export class AttackState extends State {
             return;
         }
 
-        if (this.entity.is_target_in_range(this.target)) {
-            this.entity.attack(this.target);
+        if (this.entity.is_target_in_range()) {
+            this.entity.attack();
         } else {
             this.entity.state_manager.setState(new ChaseState(this.entity));
         }
@@ -162,7 +162,7 @@ export class IdleState extends State {
             this.entity instanceof Mob &&
             this.entity.target &&
             !this.entity.target.dead &&
-            this.entity.canChase
+            this.entity.can_chase
         ) {
             const dx = Math.abs(
                 this.entity.target.position.x - this.entity.position.x
@@ -188,8 +188,8 @@ export class IdleState extends State {
                 timeSinceLastWander >= 30000 ||
                 this.entity.last_wander_time === 0
             ) {
-                if (this.entity.canWander) {
-                    if (this.entity instanceof Mob && this.entity.canPatrol) {
+                if (this.entity.can_wander) {
+                    if (this.entity instanceof Mob && this.entity.can_patrol) {
                         this.entity.state_manager.setState(
                             new PatrolState(this.entity)
                         );
@@ -230,7 +230,7 @@ export class PatrolState extends State {
             this.entity instanceof Mob &&
             this.entity.target &&
             !this.entity.target.dead &&
-            this.entity.canChase
+            this.entity.can_chase
         ) {
             const distance =
                 Math.abs(
@@ -306,7 +306,7 @@ export class WanderState extends State {
             this.entity instanceof Mob &&
             this.entity.target &&
             !this.entity.target.dead &&
-            this.entity.canChase
+            this.entity.can_chase
         ) {
             const dx = Math.abs(
                 this.entity.target.position.x - this.entity.position.x

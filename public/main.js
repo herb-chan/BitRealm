@@ -64,6 +64,7 @@ const skeleton = new Mob(
     0
 );
 skeleton.position = { x: 2, y: 1 };
+skeleton.set_target(player);
 
 const orc = new Mob(3, "orc", "Orc", 8, 200, 200, 5, 1, {}, 2, 15, 1, 1, 5, 2);
 orc.position = { x: 4, y: 2 };

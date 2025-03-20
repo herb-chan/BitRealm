@@ -54,8 +54,8 @@ export class Entity {
         this.last_wander_time = 0;
         this.last_move_time = 0;
 
-        this.canWander = true;
-        this.canFlee = true;
+        this.can_wander = true;
+        this.can_flee = true;
         this.wandering_factor = 1;
         this.attacker = null;
 
@@ -66,13 +66,9 @@ export class Entity {
     }
 
     /**
-     * @typedef {"last_action_time" | "last_attacked_time" | "last_regeneration_time" | "last_wander_time" | "last_move_time"} EntityActionType
-     */
-
-    /**
      * Updates the timestamp for a given action type and the last action time.
      *
-     * @param {EntityActionType} action_type - The name of the class property to update.
+     * @param {"last_action_time" | "last_attacked_time" | "last_regeneration_time" | "last_wander_time" | "last_move_time"} action_type - The name of the class property to update.
      */
     update_action_time(action_type) {
         const now = performance.now();
