@@ -77,6 +77,20 @@ export class Entity {
     }
 
     /**
+     * Calculates the amount of damage to receive from an attacker.
+     * @param {number} damage_amount - The amount of damage to apply.
+     * @param {boolean} from_status_effect - Whether the damage is from a status effect.
+     * @returns {number} - The amount of damage to apply.
+     */
+    calculate_damage(damage_amount, from_status_effect = false) {
+        if (from_status_effect) {
+            return damage_amount;
+        } else {
+            return damage_amount * (1 - this.defence / (this.defence + 100));
+        }
+    }
+
+    /**
      * Applies damage to the entity.
      * @param {number} damage_amount - The amount of damage to apply.
      * @param {boolean} from_status_effect - Whether the damage is from a status effect.
@@ -85,14 +99,20 @@ export class Entity {
     take_damage(damage_amount, from_status_effect = false) {
         if (this.dead) return null;
         this.update_action_time("last_attacked_time");
-        this.attacker = from_status_effect
-            ? null
-            : this.area?.entities.find((e) => e.target === this); // Simplified attacker detection
-        const actual_damage = from_status_effect
-            ? damage_amount
-            : damage_amount * (1 - this.defence / (this.defence + 100));
+
+        if (!from_status_effect) {
+            this.attacker = this.area?.entities.find((e) => e.target === this);
+        }
+
+        const actual_damage = this.calculate_damage(
+            damage_amount,
+            from_status_effect
+        );
+
         this.health = Math.max(0, this.health - actual_damage);
+
         if (this.area) this.area.updateEntityDisplay(this);
+
         return this.health === 0 ? this.on_death() : null;
     }
 
@@ -123,7 +143,7 @@ export class Entity {
      * @returns {Object} - Loot dropped by the entity.
      */
     on_death() {
-        const loot = this.drop_loot();
+        const loot = this.generate_loot();
         this.status_effect_manager.status_effects = [];
         this.dead = true;
         if (this.area) this.area.removeEntity(this);
@@ -134,8 +154,10 @@ export class Entity {
      * Generates loot based on the entity's drop table.
      * @returns {Object} - The loot dropped.
      */
-    drop_loot() {
-        let loot_dropped = {
+    generate_loot() {
+        if (!this.drops) return { gold: 0, experience: 0, items: [] };
+
+        return {
             gold: this.drops.gold
                 ? Utility.generate_number_from_range(
                       this.drops.gold.min,
@@ -143,37 +165,21 @@ export class Entity {
                   )
                 : 0,
             experience: this.drops.experience || 0,
-            items: [],
-        };
-        if (Array.isArray(this.drops.items)) {
-            this.drops.items.forEach((item) => {
+            items: (this.drops.items || []).reduce((acc, item) => {
                 if (Math.random() * 100 < item.chance) {
-                    let quantity = item.quantity
-                        ? Utility.generate_number_from_range(
-                              item.quantity.min,
-                              item.quantity.max
-                          )
-                        : 1;
-                    loot_dropped.items.push({
+                    acc.push({
                         item_id: item.item_id,
-                        quantity,
+                        quantity: item.quantity
+                            ? Utility.generate_number_from_range(
+                                  item.quantity.min,
+                                  item.quantity.max
+                              )
+                            : 1,
                     });
                 }
-            });
-        }
-        return loot_dropped;
-    }
-
-    /**
-     * Updates and applies all active status effects, then regenerates health.
-     */
-    update() {
-        if (!this.dead) {
-            this.status_effect_manager.update_status_effects(this);
-            this.state_manager.update();
-            if (this.area) this.area.updateEntityDisplay(this);
-            if (this.health < this.max_health) this.regenerate();
-        }
+                return acc;
+            }, []),
+        };
     }
 
     /**
@@ -189,5 +195,54 @@ export class Entity {
 
         status_effect.entity = this;
         this.status_effect_manager.apply_status_effect(status_effect);
+    }
+
+    /**
+     * Updates and applies all active status effects, then regenerates health.
+     */
+    update() {
+        if (this.dead) return;
+
+        this.updateStatusEffects();
+        this.updateState();
+        this.updateHealth();
+        this.updateDisplay();
+    }
+
+    /**
+     * Updates all active status effects applied to the entity.
+     * This method ensures that ongoing effects like poison, burns, or buffs
+     * are updated and applied accordingly.
+     */
+    updateStatusEffects() {
+        this.status_effect_manager.update_status_effects(this);
+    }
+
+    /**
+     * Updates the entity's current state.
+     * This triggers any state-based behavior such as wandering, fleeing, or attacking.
+     */
+    updateState() {
+        this.state_manager.update();
+    }
+
+    /**
+     * Regenerates health if the entity is below maximum health.
+     * This will only occur if the entity has not been attacked recently.
+     */
+    updateHealth() {
+        if (this.health < this.max_health) {
+            this.regenerate();
+        }
+    }
+
+    /**
+     * Updates the entity's display in the game world.
+     * If the entity is part of an area, this ensures its visual representation is refreshed.
+     */
+    updateDisplay() {
+        if (this.area) {
+            this.area.updateEntityDisplay(this);
+        }
     }
 }
