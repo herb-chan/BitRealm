@@ -71,9 +71,11 @@ export class Entity {
      * @param {"last_action_time" | "last_attacked_time" | "last_regeneration_time" | "last_wander_time" | "last_move_time"} action_type - The name of the class property to update.
      */
     update_action_time(action_type) {
-        const now = performance.now();
-        this[action_type] = now;
-        this.last_action_time = now;
+        if (this.hasOwnProperty(action_type)) {
+            this[action_type] = this.last_action_time = performance.now();
+        } else {
+            console.warn(`Invalid action type: ${action_type}`);
+        }
     }
 
     /**
