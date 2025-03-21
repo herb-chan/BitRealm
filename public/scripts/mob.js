@@ -119,7 +119,9 @@ export class Mob extends Entity {
      * Deals damage to the target entity.
      */
     deal_damage() {
-        const calculatedDamage = this.damage + (this.strength * 1.5) / 2;
+        const damage_multiplier = 1.5;
+        const calculatedDamage =
+            this.damage + (this.strength * damage_multiplier) / 2;
         this.target.take_damage(calculatedDamage);
 
         if (this.target.dead) {
