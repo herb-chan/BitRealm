@@ -1,7 +1,8 @@
 import { Utility } from "./Utils.js";
 import { StatusEffect } from "./status-effects/StatusEffect.js";
 import { StatusEffectManager } from "./status-effects/StatusEffectsManager.js";
-import { StateManager, IdleState } from "./states/StateManager.js";
+import { StateManager } from "./states/StateManager.js";
+import { IdleState } from "./states/IdleState.js";
 
 /**
  * Represents an entity in the game world.
