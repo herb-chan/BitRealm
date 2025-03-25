@@ -1,7 +1,7 @@
 /**
  * Manages event signals with support for priorities, auto-cleanup, and queued execution.
  */
-class SignalManager {
+export class SignalManager {
     constructor() {
         /**
          * Stores event listeners in a Map where the key is the event name
