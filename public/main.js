@@ -1,11 +1,19 @@
+import { Game } from "./scripts/Game.js";
 import { Area } from "./scripts/Area.js";
 import { Mob } from "./scripts/Mob.js";
 import { Burn } from "./scripts/status-effects/Burn.js";
 
-// Create the game area
-const gameArea = new Area("Forest", "area", 10, 10);
+// Create the game instance
+const game = new Game("area");
 
-// Create a player mob
+// Create and add game areas
+const forest = new Area("Forest", "area", 10, 10);
+const cave = new Area("Cave", "area", 10, 10);
+
+game.addArea(forest);
+game.addArea(cave);
+
+// Create the player
 const player = new Mob(
     0,
     "player",
@@ -26,7 +34,7 @@ const player = new Mob(
 player.position = { x: 0, y: 0 };
 player.canWander = false;
 
-// Create other mobs
+// Create enemies
 const goblin = new Mob(
     1,
     "goblin",
@@ -68,21 +76,14 @@ skeleton.set_target(player);
 
 const orc = new Mob(3, "orc", "Orc", 8, 200, 200, 5, 1, {}, 2, 15, 1, 1, 5, 2);
 orc.position = { x: 4, y: 2 };
-orc.apply_status_effect(new Burn(10, 10));
+orc.apply_status_effect(new Burn(10, 1));
 
-// Add entities to the game area
-gameArea.addEntity(player);
-gameArea.addEntity(goblin);
-gameArea.addEntity(skeleton);
-gameArea.addEntity(orc);
+// Add entities to the starting area (forest)
+forest.addEntity(player);
+forest.addEntity(goblin);
+forest.addEntity(skeleton);
+forest.addEntity(orc);
 
-// Modified game loop to include simulation steps
-function gameLoop() {
-    gameArea.entities.forEach((entity) => {
-        entity.update(); // Handles all state updates
-    });
-    requestAnimationFrame(gameLoop);
-}
-
-// Start the game loop
-gameLoop();
+// Start in the forest
+game.switchArea("Forest");
+game.start();
