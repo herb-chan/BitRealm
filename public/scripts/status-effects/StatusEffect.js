@@ -22,6 +22,14 @@ export class StatusEffect {
     }
 
     /**
+     * Updates the status effect's duration based on deltaTime.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
+     */
+    update(deltaTime) {
+        this.duration -= deltaTime; // Decrease duration by deltaTime
+    }
+
+    /**
      * Checks if the status effect has expired.
      * @returns {boolean} True if the effect is over, false otherwise.
      */

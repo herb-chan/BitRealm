@@ -10,22 +10,25 @@ export class Burn extends StatusEffect {
      */
     constructor(duration, strength = 1) {
         super("burn", "Burn", duration, strength);
+        this.tick_timer = 0; // Tracks time between burn ticks
     }
 
     /**
      * Applies burn damage over time.
-     * Should be called every second.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
-    update() {
-        const now = performance.now();
-        if (now - this.last_applied_time >= 1000) {
+    update(deltaTime) {
+        super.update(deltaTime); // Decrease duration using the base class logic
+
+        this.tick_timer += deltaTime; // Increment the tick timer
+        if (this.tick_timer >= 1) {
+            // Apply burn damage every second
             const burnDamage = this.strength * 2;
             console.log(
                 `${this.entity.name} receives ${burnDamage} burn damage from Burn.`
             );
             this.entity.take_damage(burnDamage, true);
-            this.last_applied_time = now;
-            this.duration--;
+            this.tick_timer = 0; // Reset the tick timer
         }
     }
 }

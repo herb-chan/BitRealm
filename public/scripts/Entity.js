@@ -121,20 +121,24 @@ export class Entity {
 
     /**
      * Regenerates health if the entity has not been attacked recently.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
-    regenerate() {
+    regenerate(deltaTime) {
         if (this.dead) return;
-        const now = performance.now();
+
+        const timeSinceLastAttack = performance.now() - this.last_attacked_time;
+        this.last_regeneration_time += deltaTime * 1000; // Convert deltaTime to milliseconds
+
         if (
-            now - this.last_attacked_time >= 5000 &&
-            now - this.last_regeneration_time >= 1000
+            timeSinceLastAttack >= 5000 &&
+            this.last_regeneration_time >= 1000
         ) {
             this.health = Math.min(
                 this.max_health,
                 this.health + this.health_regeneration
             );
             if (this.area) this.area.updateEntityDisplay(this);
-            this.update_action_time("last_regeneration_time");
+            this.last_regeneration_time = 0; // Reset regeneration timer
             console.log(
                 `${this.name} regenerates ${this.health_regeneration} health.`
             );
@@ -202,13 +206,14 @@ export class Entity {
 
     /**
      * Updates and applies all active status effects, then regenerates health.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
-    update() {
+    update(deltaTime) {
         if (this.dead) return;
 
-        this.updateStatusEffects();
-        this.updateState();
-        this.updateHealth();
+        this.updateStatusEffects(deltaTime);
+        this.updateState(deltaTime);
+        this.updateHealth(deltaTime);
         this.updateDisplay();
     }
 
@@ -216,26 +221,29 @@ export class Entity {
      * Updates all active status effects applied to the entity.
      * This method ensures that ongoing effects like poison, burns, or buffs
      * are updated and applied accordingly.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
-    updateStatusEffects() {
-        this.status_effect_manager.update_status_effects(this);
+    updateStatusEffects(deltaTime) {
+        this.status_effect_manager.update_status_effects(this, deltaTime);
     }
 
     /**
      * Updates the entity's current state.
      * This triggers any state-based behavior such as wandering, fleeing, or attacking.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
-    updateState() {
-        this.state_manager.update();
+    updateState(deltaTime) {
+        this.state_manager.update(deltaTime);
     }
 
     /**
      * Regenerates health if the entity is below maximum health.
      * This will only occur if the entity has not been attacked recently.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
-    updateHealth() {
+    updateHealth(deltaTime) {
         if (this.health < this.max_health) {
-            this.regenerate();
+            this.regenerate(deltaTime);
         }
     }
 

@@ -15,9 +15,13 @@ export class StateManager {
         );
     }
 
-    update() {
+    /**
+     * Updates the current state.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
+     */
+    update(deltaTime) {
         if (this.current_state) {
-            this.current_state.update();
+            this.current_state.update(deltaTime);
         }
     }
 }

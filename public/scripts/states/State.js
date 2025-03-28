@@ -4,6 +4,12 @@ export class State {
     }
 
     enter() {}
-    update() {}
+
+    /**
+     * Updates the state.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
+     */
+    update(deltaTime) {}
+
     exit() {}
 }

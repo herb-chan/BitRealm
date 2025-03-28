@@ -1,7 +1,7 @@
 import { State } from "./State.js";
 import { AttackState } from "./AttackState.js";
-import { FleeState } from "./FleeState.js";
 import { IdleState } from "./IdleState.js";
+import { FleeState } from "./FleeState.js";
 
 export class ChaseState extends State {
     enter() {
@@ -10,9 +10,10 @@ export class ChaseState extends State {
         if (this.target.state_manager.currentState instanceof FleeState) {
             this.currentAggroRange *= 2; // Double aggro range if target is fleeing
         }
+        this.lastMoveTime = 0; // Reset move timer
     }
 
-    update() {
+    update(deltaTime) {
         if (!this.target || this.target.dead) {
             this.entity.state_manager.setState(new IdleState(this.entity));
             return;
@@ -27,8 +28,9 @@ export class ChaseState extends State {
         } else if (distance > this.currentAggroRange) {
             this.entity.state_manager.setState(new IdleState(this.entity));
         } else {
-            const now = performance.now();
-            if (now - this.entity.last_move_time >= 1000 / this.entity.speed) {
+            this.lastMoveTime += deltaTime;
+            const moveDelay = 1 / this.entity.speed; // Balance movement speed
+            if (this.lastMoveTime >= moveDelay) {
                 this.entity.path = this.entity.area.aStar(
                     this.entity.position,
                     this.target.position
@@ -45,7 +47,7 @@ export class ChaseState extends State {
                             this.entity.position.x
                         ] = this.entity;
                         this.entity.area.updateEntityPosition(this.entity);
-                        this.entity.last_move_time = now;
+                        this.lastMoveTime = 0; // Reset move timer
                         console.log(
                             `${this.entity.name} chases to (${nextPos.x}, ${nextPos.y})`
                         );

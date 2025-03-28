@@ -15,14 +15,17 @@ export class PatrolState extends State {
             { x: this.patrolCenter.x - 1, y: this.patrolCenter.y + 1 },
         ];
         this.currentPointIndex = 0;
+        this.timeSinceLastMove = 0; // Tracks time since the last move
     }
 
     enter() {
-        this.startTime = performance.now();
+        this.timeSinceLastMove = 0; // Reset move timer
     }
 
-    update() {
-        const now = performance.now();
+    update(deltaTime) {
+        // Increment the time since the last move
+        this.timeSinceLastMove += deltaTime;
+
         // Check for a target within aggro_range if the entity is a Mob.
         if (
             this.entity instanceof Mob &&
@@ -43,12 +46,15 @@ export class PatrolState extends State {
             }
         }
 
-        if (now - this.entity.last_attacked_time < 2000) {
+        // Check if the entity should stop patrolling and return to IdleState
+        if (this.entity.last_attacked_time < 2) {
             this.entity.state_manager.setState(new IdleState(this.entity));
             return;
         }
 
-        if (now - this.entity.last_move_time >= 1000 / this.entity.speed) {
+        // Handle movement delay based on speed
+        const moveDelay = 1 / this.entity.speed; // Balance movement speed
+        if (this.timeSinceLastMove >= moveDelay) {
             const targetPoint = this.points[this.currentPointIndex];
             this.entity.path = this.entity.area.aStar(
                 this.entity.position,
@@ -66,18 +72,22 @@ export class PatrolState extends State {
                         this.entity.position.x
                     ] = this.entity;
                     this.entity.area.updateEntityPosition(this.entity);
-                    this.entity.last_move_time = now;
                     console.log(
                         `${this.entity.name} patrols to (${nextPos.x}, ${nextPos.y})`
                     );
                 }
             }
+
+            // Check if the entity has reached the target point
             if (
                 this.entity.position.x === targetPoint.x &&
                 this.entity.position.y === targetPoint.y
             ) {
                 this.currentPointIndex = (this.currentPointIndex + 1) % 4;
             }
+
+            // Reset the move timer
+            this.timeSinceLastMove = 0;
         }
     }
 

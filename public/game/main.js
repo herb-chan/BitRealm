@@ -1,7 +1,7 @@
-import { Game } from "./scripts/Game.js";
-import { Area } from "./scripts/Area.js";
-import { Mob } from "./scripts/Mob.js";
-import { Burn } from "./scripts/status-effects/Burn.js";
+import { Game } from "../scripts/Game.js";
+import { Area } from "../scripts/Area.js";
+import { Mob } from "../scripts/Mob.js";
+import { Burn } from "../scripts/status-effects/Burn.js";
 
 // Create the game instance
 const game = new Game("area");

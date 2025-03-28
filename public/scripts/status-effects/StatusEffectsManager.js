@@ -36,11 +36,12 @@ export class StatusEffectManager {
 
     /**
      * Updates all status effects applied to an entity.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
-    update_status_effects() {
+    update_status_effects(deltaTime) {
         this.status_effects.forEach((status_effect) => {
             if (typeof status_effect.update === "function") {
-                status_effect.update();
+                status_effect.update(deltaTime); // Pass deltaTime to the status effect
             }
         });
 

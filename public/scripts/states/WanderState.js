@@ -8,17 +8,17 @@ export class WanderState extends State {
     constructor(entity) {
         super(entity);
         this.wanderingFactor = this.entity.wandering_factor || 1;
-        this.baseWanderTime = 10000; // 10 seconds
+        this.baseWanderTime = 10; // 10 seconds (converted to seconds)
+        this.wanderDuration = 0;
+        this.lastMoveTime = 0; // Tracks time since the last move
     }
 
     enter() {
-        this.startTime = performance.now();
         this.wanderDuration = this.baseWanderTime * this.wanderingFactor;
-        this.entity.last_wander_time = this.startTime;
-        this.lastMoveTime = 0; // Track last move time
+        this.lastMoveTime = 0; // Reset move timer
     }
 
-    update() {
+    update(deltaTime) {
         // Check for a target within aggro_range if the entity is a Mob.
         if (
             this.entity instanceof Mob &&
@@ -39,17 +39,17 @@ export class WanderState extends State {
             }
         }
 
-        const now = performance.now();
-
-        if (now - this.entity.last_attacked_time < 2000) {
+        // Check if the entity should stop wandering.
+        this.wanderDuration -= deltaTime;
+        if (this.wanderDuration <= 0) {
             this.entity.state_manager.setState(new IdleState(this.entity));
             return;
         }
 
-        const moveDelay = 1000 / this.entity.speed; // Balance movement speed
-
-        // Check if enough time has passed to move.
-        if (now - this.lastMoveTime >= moveDelay) {
+        // Handle movement delay based on speed.
+        this.lastMoveTime += deltaTime;
+        const moveDelay = 1 / this.entity.speed; // Balance movement speed
+        if (this.lastMoveTime >= moveDelay) {
             if (this.entity.area) {
                 const neighbors = this.entity.area.getNeighbors(
                     this.entity.position.x,
@@ -70,14 +70,9 @@ export class WanderState extends State {
                     console.log(
                         `${this.entity.name} wanders to (${this.entity.position.x}, ${this.entity.position.y})`
                     );
-                    this.lastMoveTime = now; // Update last move time
+                    this.lastMoveTime = 0; // Reset move timer
                 }
             }
-        }
-
-        // End wandering after the duration.
-        if (now - this.startTime >= this.wanderDuration) {
-            this.entity.state_manager.setState(new IdleState(this.entity));
         }
     }
 

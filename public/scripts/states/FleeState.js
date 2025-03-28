@@ -4,12 +4,16 @@ import { IdleState } from "./IdleState.js";
 export class FleeState extends State {
     enter() {
         this.attacker = this.entity.attacker; // Assume attacker is set when damaged
+        this.timeSinceLastAttack = 0; // Tracks time since the last attack
     }
 
-    update() {
-        const now = performance.now();
+    update(deltaTime) {
+        // Increment time since the last attack
+        this.timeSinceLastAttack += deltaTime;
+
+        // Check if the entity should stop fleeing
         if (
-            now - this.entity.last_attacked_time >= 5000 ||
+            this.timeSinceLastAttack >= 5 || // 5 seconds since last attack
             this.entity.health > this.entity.max_health * 0.2
         ) {
             this.entity.state_manager.setState(new IdleState(this.entity));

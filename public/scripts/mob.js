@@ -91,17 +91,6 @@ export class Mob extends Entity {
     }
 
     /**
-     * Determines if the mob can attack based on attack speed cooldown.
-     * @returns {boolean} - True if the mob can attack, false otherwise.
-     */
-    can_attack() {
-        return (
-            performance.now() - this.last_attack_time >=
-            1000 / this.attack_speed
-        );
-    }
-
-    /**
      * Attacks the current target if possible.
      */
     attack() {
@@ -109,10 +98,23 @@ export class Mob extends Entity {
             console.log(`${this.name} has no valid target to attack.`);
             return;
         }
-        if (this.can_attack()) {
-            this.deal_damage();
-            this.update_action_time("last_attack_time");
+        this.deal_damage();
+    }
+
+    /**
+     * Updates the mob's behavior, including attacking, moving, and regenerating health.
+     * @param {number} deltaTime - The time elapsed since the last update, in seconds.
+     */
+    update(deltaTime) {
+        if (this.dead) return;
+
+        // Let the state manager handle behavior, including attacking
+        if (this.state_manager) {
+            this.state_manager.update(deltaTime);
         }
+
+        // Call parent update for status effects, health regeneration, etc.
+        super.update(deltaTime);
     }
 
     /**
@@ -145,7 +147,7 @@ export class Mob extends Entity {
      */
     take_damage(damage_amount, from_status_effect = false) {
         super.take_damage(damage_amount, from_status_effect);
-        if (!from_status_effect) {
+        if (!from_status_effect && this.attacker) {
             console.log(
                 `${this.name} has been attacked by ${this.attacker.name}`
             );

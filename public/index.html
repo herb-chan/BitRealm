@@ -3,31 +3,29 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>BitRealm</title>
-    <style>
-        #area {
-            position: relative;
-            background-color: #f0f0f0;
-        }
-
-        .entity {
-            position: absolute;
-            width: 60px;
-            height: 40px;
-            background-color: red;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            text-align: center;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitRealm - Home</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div id="area"></div>
-    <script type="module" src="main.js"></script>
+    <main id="menu-container">
+        <h1>BitRealm</h1>
+        <a href="game/bitrealm.html">game</a>
+        <footer>
+            <section id="bitrealm">
+                <p id="license"></p>
+                <p id="version"></p>
+            </section>
+            <section id="option_select"></section>
+            <section id="informations">
+                <button id="github"></button>
+                <button id="patch_notes"></button>
+                <button id="credits"></button>
+                <button id="website"></button>
+            </section>
+        </footer>
+    </main>
 </body>
 
 </html>

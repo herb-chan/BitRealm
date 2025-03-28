@@ -7,10 +7,15 @@ import { Mob } from "../Mob.js";
 
 export class IdleState extends State {
     enter() {
-        this.enterTime = performance.now();
+        this.timeSinceLastAction = 0; // Tracks time since the last action
+        this.timeSinceLastWander = 0; // Tracks time since the last wander
     }
 
-    update() {
+    update(deltaTime) {
+        // Increment timers
+        this.timeSinceLastAction += deltaTime;
+        this.timeSinceLastWander += deltaTime;
+
         // Check if a Mob sees its target within aggro_range.
         if (
             this.entity instanceof Mob &&
@@ -31,15 +36,11 @@ export class IdleState extends State {
             }
         }
 
-        const now = performance.now();
-        const timeSinceLastAction = now - this.entity.last_attacked_time;
-        const timeSinceLastWander = now - this.entity.last_wander_time;
-
         // Check if entity is out of combat and inactive for 2 seconds.
-        if (timeSinceLastAction >= 2000 && !this.entity.dead) {
+        if (this.timeSinceLastAction >= 2 && !this.entity.dead) {
             // Check if WanderState hasn't been entered in the last 30 seconds.
             if (
-                timeSinceLastWander >= 30000 ||
+                this.timeSinceLastWander >= 30 ||
                 this.entity.last_wander_time === 0
             ) {
                 if (this.entity.can_wander) {
