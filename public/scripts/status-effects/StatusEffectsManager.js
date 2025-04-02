@@ -1,5 +1,3 @@
-import { StatusEffect } from "./StatusEffect.js";
-
 /**
  * Manages and applies status effects to an entity.
  */
@@ -39,9 +37,10 @@ export class StatusEffectManager {
      * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
     update_status_effects(deltaTime) {
+        // Update each effect
         this.status_effects.forEach((status_effect) => {
             if (typeof status_effect.update === "function") {
-                status_effect.update(deltaTime); // Pass deltaTime to the status effect
+                status_effect.update(deltaTime);
             }
         });
 

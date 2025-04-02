@@ -224,7 +224,7 @@ export class Entity {
      * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
     updateStatusEffects(deltaTime) {
-        this.status_effect_manager.update_status_effects(this, deltaTime);
+        this.status_effect_manager.update_status_effects(deltaTime);
     }
 
     /**

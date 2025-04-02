@@ -10,8 +10,7 @@ export class StatusEffect {
      * @param {string} id - Unique identifier for the status effect (e.g., "burn").
      * @param {string} name - Readable name of the status effect (e.g., "Burn").
      * @param {number} duration - Duration of the status effect in seconds.
-     * @param {number} [strength=1] - Strength of the status effect effect.
-     * @param {StatusEffectType} type - Type of the status effect.
+     * @param {number} [strength=1] - Strength of the status effect.
      */
     constructor(id, name, duration, strength = 1) {
         this.id = id;

@@ -18,17 +18,26 @@ export class Burn extends StatusEffect {
      * @param {number} deltaTime - The time elapsed since the last update, in seconds.
      */
     update(deltaTime) {
-        super.update(deltaTime); // Decrease duration using the base class logic
+        // First, decrease the effect's duration
+        super.update(deltaTime);
 
-        this.tick_timer += deltaTime; // Increment the tick timer
-        if (this.tick_timer >= 1) {
-            // Apply burn damage every second
+        // If the effect is expired, do not apply further damage.
+        if (this.is_expired()) {
+            return;
+        }
+
+        // Increment the tick timer and apply damage for every elapsed second.
+        this.tick_timer += deltaTime;
+        while (this.tick_timer >= 1) {
             const burnDamage = this.strength * 2;
-            console.log(
-                `${this.entity.name} receives ${burnDamage} burn damage from Burn.`
-            );
-            this.entity.take_damage(burnDamage, true);
-            this.tick_timer = 0; // Reset the tick timer
+            if (this.entity) {
+                console.log(
+                    `${this.entity.name} receives ${burnDamage} burn damage from Burn.`
+                );
+                this.entity.take_damage(burnDamage, true);
+            }
+            // Subtract one second while preserving any overflow time.
+            this.tick_timer -= 1;
         }
     }
 }
